@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Chamado Confirmado</title>
+  <link rel="stylesheet" href="style.css">
+  <script>
+
+    function lerCookie(nome) {
+      const cookies = document.cookie.split("; ");
+      for (const c of cookies) {
+        const [key, val] = c.split("=");
+        if (key === nome) return decodeURIComponent(val);
+      }
+      return null;
+    }
+
+    window.onload = () => {
+      const nome = lerCookie("NOME");
+      const problema = lerCookie("PROBLEMA");
+      const local = lerCookie("LOCAL");
+      const agora = new Date();
+
+      document.getElementById("mensagem").innerText = `${nome} relatou um problema: "${problema}" no local ${local}`;
+      document.getElementById("data").innerText = `Enviado em ${agora.toLocaleDateString()} às ${agora.toLocaleTimeString()}`;
+
+      fetch("/registrar", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({nome, problema, local, data: agora.toISOString()})
+      }).then(() => {
+        // Limpar cookies após envio
+        document.cookie = "NOME=; max-age=0; path=/";
+        document.cookie = "PROBLEMA=; max-age=0; path=/";
+        document.cookie = "LOCAL=; max-age=0; path=/";
+      });
+    };
+  </script>
+</head>
+<body>
+  <h1>Chamado Registrado com Sucesso</h1>
+  <p id="mensagem"></p>
+  <p id="data"></p>
+</body>
+</html>
